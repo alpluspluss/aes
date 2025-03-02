@@ -9,7 +9,7 @@ namespace aes
 	constexpr uint64_t GENERATION_SHIFT = 48; /* we need to shift 16 bits upper to accommodate the entity bits */
 	constexpr Generation MAX_GENERATION = 0xFFFF; /* for 16-bit generation */
 
-	World::World() : alive_count(0), next_id(0) {} /* initializes our world */
+	World::World() : alive_count(0), next_eid(0) {} /* initializes our world */
 
 	/* this method creates a new entity by either reusing a previously deleted one or a previously deleted one */
 	Entity World::entity()
@@ -31,8 +31,8 @@ namespace aes
 		else
 		{
 			/* newborn path */
-			entity = next_id;
-			++next_id;
+			entity = next_eid;
+			++next_eid;
 			gen = 0;
 
 			/* add to the pool */
@@ -52,7 +52,7 @@ namespace aes
 	}
 
 	/* note: the 'entity' parameter is encoded */
-	void World::despawn(Entity entity)
+	void World::despawn(const Entity entity)
 	{
 		/* get the metadata from the encoded id; this maybe be optimized to make it return a pair instead
 		 * to reduce function call overhead */
@@ -75,10 +75,15 @@ namespace aes
 			entity_pool[index] = entity_pool[alive_count - 1];
 
 		entity_pool[alive_count - 1] = entity_id; /* place the destroyed entity at the end of the alive section */
-		--alive_count; /* an entity dies so we decrease this value */
+		--alive_count;                            /* an entity dies so we decrease this value */
 
 		/* increment the generation for future reuse; wrap around if it exceeds MAX_GENERATION */
 		generations[entity_id] = (generations[entity_id] + 1) > MAX_GENERATION ? 0 : generations[entity_id] + 1;
+	}
+
+	Component World::component()
+	{
+		return next_cid++; /* assign a component id then return */
 	}
 
 	/* gets an unmasked entity id */

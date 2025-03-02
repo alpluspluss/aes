@@ -6,6 +6,7 @@
 
 namespace aes
 {
+	using Component = uint16_t;
 	using Entity = uint64_t;
 	using Generation = uint16_t;
 }
