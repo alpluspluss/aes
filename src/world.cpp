@@ -1,2 +1,63 @@
-#include <aes/aes.hpp>
+/* this file is a part of AES project which is under the MIT license; See LICENSE for more info */
 
+#include <aes/types.hpp>
+#include <aes/world.hpp>
+
+namespace aes
+{
+	constexpr uint64_t ENTITY_MASK = 0x0000FFFFFFFFFFFF; /* 48 lower bits for entity id */
+	constexpr uint64_t GENERATION_SHIFT = 48; /* we need to shift 16 bits upper to accommodate the entity bits */
+	constexpr Generation MAX_GENERATION = 0xFFFF; /* for 16-bit generation */
+
+	Entity World::encode_entity(const uint64_t id, const Generation gen)
+	{
+		return (static_cast<Entity>(gen) << GENERATION_SHIFT) | (id & ENTITY_MASK);
+	}
+
+	World::World() : alive_count(0), next_id(0) {} /* initializes our world */
+
+	/* this method creates a new entity by either reusing a previously deleted one or a previously deleted one */
+	Entity World::entity()
+	{
+		Entity entity;
+		Generation gen;
+
+		if (alive_count < entity_pool.size())
+		{
+			/* recycling */
+			entity = entity_pool[alive_count]; /* get the entity id to recycle */
+
+			const auto it = generations.find(entity);
+			gen = (it != generations.end() ? it->second : 0) + 1;
+
+			/* wrap around if generation is overflow */
+			gen = gen > MAX_GENERATION /* 16-bit */ ? 0 : gen;
+		}
+		else
+		{
+			/* newborn path */
+			entity = next_id;
+			++next_id;
+			gen = 0;
+
+			/* add to the pool */
+			entity_pool.emplace_back(entity);
+		}
+
+		++alive_count;
+		generations[entity] = gen;
+		return encode_entity(entity, gen);
+	}
+
+	/* gets an unmasked entity id */
+	uint64_t World::get_eid(const Entity entity)
+	{
+		return entity & ENTITY_MASK;
+	}
+
+	/* gets an unmasked entity generation */
+	Generation World::get_egen(const Entity entity)
+	{
+		return static_cast<Generation>(entity >> GENERATION_SHIFT);
+	}
+}

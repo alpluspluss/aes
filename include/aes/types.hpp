@@ -2,5 +2,10 @@
 
 #pragma once
 
-#include <aes/types.hpp>
-#include <aes/world.hpp>
+#include <cstdint>
+
+namespace aes
+{
+	using Entity = uint64_t;
+	using Generation = uint16_t;
+}
