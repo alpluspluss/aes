@@ -81,11 +81,6 @@ namespace aes
 		generations[entity_id] = (generations[entity_id] + 1) > MAX_GENERATION ? 0 : generations[entity_id] + 1;
 	}
 
-	Component World::component()
-	{
-		return next_cid++; /* assign a component id then return */
-	}
-
 	/* gets an unmasked entity id */
 	uint64_t World::get_eid(const Entity entity)
 	{
