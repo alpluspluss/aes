@@ -15,6 +15,8 @@ namespace aes
 
 		Entity entity(); /* creates or reuses an entity */
 
+		void despawn(Entity entity); /* despawn an entity and put them in the pool */
+
 		/* utils; for testing or debug purposes */
 		static Entity encode_entity(uint64_t id, Generation gen); /* binary encoding */
 
