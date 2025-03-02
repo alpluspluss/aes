@@ -41,6 +41,7 @@ namespace aes
 
 		++alive_count;
 		generations[entity] = gen;
+		entity_indices[entity] = alive_count - 1; /* store entity's position in the pool */
 		return encode_entity(entity, gen);
 	}
 
@@ -55,27 +56,22 @@ namespace aes
 	{
 		/* get the metadata from the encoded id; this maybe be optimized to make it return a pair instead
 		 * to reduce function call overhead */
-		uint64_t entity_id = get_eid(entity);
-		Generation gen = get_egen(entity);
+		const uint64_t entity_id = get_eid(entity);
+		const Generation gen = get_egen(entity);
 
 		/* check if the entity exists with valid generation */
-		auto it = generations.find(entity_id);
-		if (it == generations.end() || it->second != gen)
+		if (const auto it = generations.find(entity_id);
+			it == generations.end() || it->second != gen)
 			return;
 
 		/* find the entity in the pool */
-		size_t index = 0;
-		for (size_t i = 0; i < alive_count; ++i)
-		{
-			if (entity_pool[i] == entity_id)
-			{
-				index = i;
-				break;
-			}
-		}
+		const auto idx_it = entity_indices.find(entity_id);
+		if (idx_it == entity_indices.end())
+			return; /* this shouldn't happen if our bookkeeping is correct */
 
 		/* move the last alive entity to this position if it's not */
-		if (index < alive_count - 1)
+		if (const size_t index = idx_it->second;
+			index < alive_count - 1)
 			entity_pool[index] = entity_pool[alive_count - 1];
 
 		entity_pool[alive_count - 1] = entity_id; /* place the destroyed entity at the end of the alive section */

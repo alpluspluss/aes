@@ -27,6 +27,8 @@ namespace aes
 	private:
 		/* members are ordered by their sizes */
 		std::unordered_map<Entity, Generation> generations; /* a sparse set to track decoded entity's id */
+		std::unordered_map<uint64_t, size_t> entity_indices; /* maps entity ids to their index position in the
+																								entity pool array*/
 		std::vector<Entity> entity_pool; /* available ids */
 		uint64_t alive_count; /* the current number of alive & active entity */
 		uint64_t next_id; /* next id */
